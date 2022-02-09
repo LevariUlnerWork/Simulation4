@@ -7,6 +7,7 @@ import functools
 import seaborn as sns
 from random import randint
 import scipy.stats
+import math
 
 STOCKS_LIST = [('BMY', (1/7)), ('CVS', (1/7)), ('DAL', (1/7)), ('FB', (1/7)), ('UG', (1/7)), ('SWKS', (1/7)), ('MUV', (1/7))]
 
@@ -50,3 +51,24 @@ def hist_stock():
         plt.xlabel("Changes (Precentage)")
         plt.ylabel("Amount of Days")
         plt.show()
+
+def calculations():
+    df = daily_stock()
+    for i in df:
+        print(df[i])
+        mean = sum(df[i])/len(df[i])
+        print(f'Mean: {mean}')
+        sd = 0
+        for val in df[i]:
+            sd += pow(val - mean,2)
+        sd_value = math.sqrt(sd/(len(df[i])-1))
+        print(f'Standard Deviation: {sd_value}')
+
+        # correlation
+        corr = pd.Series(df[i]).autocorr()
+        print(f'Corr: {corr}')
+
+        #cov matrix
+
+
+calculations()
