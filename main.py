@@ -68,7 +68,26 @@ def calculations():
         corr = pd.Series(df[i]).autocorr()
         print(f'Corr: {corr}')
 
-        #cov matrix
+    #cov matrix
+    df = daily_stock_pct()
+    stocks_values = []
+    for current_stock in STOCKS_LIST:
+        current_stock_values = df[f'return_{current_stock[0]}'].values
+        stocks_values.append(current_stock_values)
+
+    covariance_matrix = np.cov(current_stock_values)
+    covariance_matrix *= 100
+
+    # plot the heatmap
+    sns.heatmap(covariance_matrix,
+                xticklabels=[x[7:] for x in df.columns],
+                yticklabels=[x[7:] for x in df.columns],
+                cbar=True,
+                annot=True,
+                square=True,
+                annot_kws={'size': 8, 'color': '#00A2FF', 'ha': 'center', 'va': 'top', 'weight': 'bold'})
+    plt.title('Covariance Matrix\n\n', fontweight='bold', fontsize=8)
+    plt.show()
 
 
 calculations()
