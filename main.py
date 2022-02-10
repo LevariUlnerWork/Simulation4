@@ -16,7 +16,7 @@ END_DATE = "2021-12-31"
 
 #------------------------------- Question 1 ---------------------------------------------
 
-def daily_stock_pct():
+def daily_stock_pct(STOCKS_LIST):
     returns = pd.DataFrame({})
     for t in STOCKS_LIST:
         name = t[0]
@@ -26,10 +26,10 @@ def daily_stock_pct():
         returns = returns.join(data[['return_%s' % (name)]],
                                how="outer").dropna()
 
-    print(returns)
+    # print(returns)
     return returns
 
-def daily_stock():
+def daily_stock(STOCKS_LIST):
     returns = pd.DataFrame({})
     for t in STOCKS_LIST:
         name = t[0]
@@ -38,12 +38,11 @@ def daily_stock():
         data['return_%s' % (name)] = data['Close'].pct_change(1)
         returns = returns.join(data[['return_%s' % (name)]],
                                how="outer").dropna()
-
     # print(returns)
     return returns
 
-def hist_stock():
-    df = daily_stock_pct()
+def hist_stock(STOCKS_LIST):
+    df = daily_stock_pct(STOCKS_LIST)
     for i in df:
         df_new = df[i]
         plt.hist(df_new,bins=50, color='#0080FF', edgecolor='black', linewidth=1.8, alpha=0.65)
@@ -52,10 +51,10 @@ def hist_stock():
         plt.ylabel("Amount of Days")
         plt.show()
 
-def calculations():
-    df = daily_stock()
+def calculations(STOCKS_LIST):
+    df = daily_stock(STOCKS_LIST)
     for i in df:
-        print(df[i])
+        print(i[7:]," statistics:\n")
         mean = sum(df[i])/len(df[i])
         print(f'Mean: {mean}')
         sd = 0
@@ -66,16 +65,19 @@ def calculations():
 
         # correlation
         corr = pd.Series(df[i]).autocorr()
-        print(f'Corr: {corr}')
+        print(f'Corr: {corr}','\n')
 
     #cov matrix
-    df = daily_stock_pct()
+    # df = daily_stock(STOCKS_LIST_COV)
     stocks_values = []
+    df['date'] = [date for date in df.index]
+    df['ID'] = [i for i in range(df.shape[0])]
+    df = df.set_index('ID')
     for current_stock in STOCKS_LIST:
         current_stock_values = df[f'return_{current_stock[0]}'].values
         stocks_values.append(current_stock_values)
 
-    covariance_matrix = np.cov(current_stock_values)
+    covariance_matrix = np.cov(stocks_values)
     covariance_matrix *= 100
 
     # plot the heatmap
@@ -85,9 +87,17 @@ def calculations():
                 cbar=True,
                 annot=True,
                 square=True,
-                annot_kws={'size': 8, 'color': '#00A2FF', 'ha': 'center', 'va': 'top', 'weight': 'bold'})
-    plt.title('Covariance Matrix\n\n', fontweight='bold', fontsize=8)
+                annot_kws={'size': 9, 'color': 'red', 'ha': 'center', 'va': 'top', 'weight': 'bold'})
+    plt.title('Covariance Matrix\n\n', fontweight='bold', fontsize=14)
     plt.show()
 
+def Q1(STOCKS_LIST=STOCKS_LIST):
+    print("------------------------------- Question 1 ---------------------------------------------")
+    hist_stock(STOCKS_LIST)
+    calculations(STOCKS_LIST)
 
-calculations()
+
+Q1()
+
+
+#------------------------------- Question 2 ---------------------------------------------
