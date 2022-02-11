@@ -129,7 +129,7 @@ def Q2():
     NumOfWin = 200
     NumOfDaysPerWin = int(WorkDaysPerYear * 3.5 / NumOfWin) + 1
     df_into_bins = np.array_split(df,df.shape[0]/int(NumOfDaysPerWin))
-    print("hi")
+    new_df = sim_rand_win(df_into_bins, 1, 200)
 
 
     #Part A:
