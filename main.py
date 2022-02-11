@@ -14,8 +14,7 @@ STOCKS_LIST = [('BMY', (1/7)), ('CVS', (1/7)), ('DAL', (1/7)), ('FB', (1/7)), ('
 START_DATE = "2013-01-01"
 END_DATE = "2021-12-31"
 
-#------------------------------- Question 1 ---------------------------------------------
-
+#------------------------------- Other Func ---------------------------------------------
 def daily_stock_pct(STOCKS_LIST):
     returns = pd.DataFrame({})
     for t in STOCKS_LIST:
@@ -25,7 +24,9 @@ def daily_stock_pct(STOCKS_LIST):
         data['return_%s' % (name)] = data['Close'].pct_change(1)*100
         returns = returns.join(data[['return_%s' % (name)]],
                                how="outer").dropna()
-
+    returns['Date'] = [date for date in returns.index]
+    returns['ID'] = [i for i in range(returns.shape[0])]
+    returns = returns.set_index('ID')
     # print(returns)
     return returns
 
@@ -40,6 +41,30 @@ def daily_stock(STOCKS_LIST):
                                how="outer").dropna()
     # print(returns)
     return returns
+
+def randWin(df_list, wanted_num_win=200):
+    total_num_win = len(df_list)
+    rand_num_list = []
+
+    # Random Numbers
+    while len(rand_num_list) < wanted_num_win:
+        rand_num = randint(0,total_num_win)
+        if(rand_num not in rand_num_list):
+            rand_num_list.append(rand_num)
+
+    # 200 windows concat:
+    df_res = pd.concat([df_list[bin_index] for bin_index in rand_num_list],ignore_index=True)
+
+    return df_res
+
+def sim_rand_win(df_list,num_sim = 100,num_win = 200):
+    df_list_res = []
+    for i in range (num_sim):
+        df_list_res.append(randWin(df_list,num_win))
+    return df_list_res
+
+
+#------------------------------- Question 1 ---------------------------------------------
 
 def hist_stock(STOCKS_LIST):
     df = daily_stock_pct(STOCKS_LIST)
@@ -68,11 +93,8 @@ def calculations(STOCKS_LIST):
         print(f'Corr: {corr}','\n')
 
     #cov matrix
-    # df = daily_stock(STOCKS_LIST_COV)
     stocks_values = []
-    df['date'] = [date for date in df.index]
-    df['ID'] = [i for i in range(df.shape[0])]
-    df = df.set_index('ID')
+
     for current_stock in STOCKS_LIST:
         current_stock_values = df[f'return_{current_stock[0]}'].values
         stocks_values.append(current_stock_values)
@@ -101,16 +123,21 @@ def Q1(STOCKS_LIST=STOCKS_LIST):
 
 #------------------------------- Question 2 ---------------------------------------------
 
+def Q2():
+    df = daily_stock(STOCKS_LIST)
+    WorkDaysPerYear = 252
+    NumOfWin = 200
+    NumOfDaysPerWin = int(WorkDaysPerYear * 3.5 / NumOfWin) + 1
+    df_into_bins = np.array_split(df,df.shape[0]/int(NumOfDaysPerWin))
+    print("hi")
 
 
+    #Part A:
 
-
-
-
-
+    #Q1:
 
 #------------------------------- Main ---------------------------------------------
-Q1()
+Q2()
 
 
 
