@@ -20,15 +20,15 @@ def daily_stock_pct(STOCKS_LIST):
     for t in STOCKS_LIST:
         name = t[0]
         ticker = yfinance.Ticker(name)
-        data = ticker.history(interval="1d",start=START_DATE, end=END_DATE)
+        data = ticker.history(interval="1d", start=START_DATE, end=END_DATE)
         data['return_%s' % (name)] = data['Close'].pct_change(1)*100
-        returns = returns.join(data[['return_%s' % (name)]],
-                               how="outer").dropna()
+        returns = returns.join(data[['return_%s' % (name)]], how="outer").dropna()
     returns['Date'] = [date for date in returns.index]
     returns['ID'] = [i for i in range(returns.shape[0])]
     returns = returns.set_index('ID')
-    # print(returns)
+    print(returns)
     return returns
+
 
 def daily_stock(STOCKS_LIST):
     returns = pd.DataFrame({})
@@ -37,10 +37,10 @@ def daily_stock(STOCKS_LIST):
         ticker = yfinance.Ticker(name)
         data = ticker.history(interval="1d",start=START_DATE, end=END_DATE)
         data['return_%s' % (name)] = data['Close'].pct_change(1)
-        returns = returns.join(data[['return_%s' % (name)]],
-                               how="outer").dropna()
+        returns = returns.join(data[['return_%s' % (name)]], how="outer").dropna()
     # print(returns)
     return returns
+daily_stock(STOCKS_LIST)
 
 def randWin(df_list, wanted_num_win=200):
     total_num_win = len(df_list)
@@ -67,7 +67,7 @@ def sim_rand_win(df_list,num_sim = 100,num_win = 200):
 #------------------------------- Question 1 ---------------------------------------------
 
 def hist_stock(STOCKS_LIST):
-    df = daily_stock_pct(STOCKS_LIST)
+    df = daily_stock_pct(STOCKS_LIST) #not daily_stock??
     for i in df:
         df_new = df[i]
         plt.hist(df_new,bins=50, color='#0080FF', edgecolor='black', linewidth=1.8, alpha=0.65)
@@ -79,7 +79,7 @@ def hist_stock(STOCKS_LIST):
 def calculations(STOCKS_LIST):
     df = daily_stock(STOCKS_LIST)
     for i in df:
-        print(i[7:]," statistics:\n")
+        print(i[7:]," statistics:\n") #why 7: ????
         mean = sum(df[i])/len(df[i])
         print(f'Mean: {mean}')
         sd = 0
@@ -110,8 +110,15 @@ def calculations(STOCKS_LIST):
                 annot=True,
                 square=True,
                 annot_kws={'size': 9, 'color': 'red', 'ha': 'center', 'va': 'top', 'weight': 'bold'})
-    plt.title('Covariance Matrix\n\n', fontweight='bold', fontsize=14)
+    plt.title('Covariance Matrix\n', fontweight='bold', fontsize=14)
     plt.show()
+
+# def groupby(STOCKS_LIST):
+#     df = daily_stock(STOCKS_LIST)
+    # print(df)
+    # print(df['Date'].dt.year)
+
+# groupby(STOCKS_LIST)
 
 def Q1(STOCKS_LIST=STOCKS_LIST):
     print("------------------------------- Question 1 ---------------------------------------------")
