@@ -63,6 +63,23 @@ def sim_rand_win(df_list,num_sim = 100,num_win = 200):
         df_list_res.append(randWin(df_list,num_win))
     return df_list_res
 
+def df_split_by_year(df=None):
+    df = daily_stock(STOCKS_LIST)
+    it = ""
+    first_counter = 0
+    last_counter = 0
+    df_list = []
+    for i in df.index:
+        ts = str(i)[:4]
+        if (it == ""):
+            it = ts
+        if( ts != it):
+            df_list.append(df.iloc[first_counter:last_counter])
+            first_counter = last_counter
+            it = ts
+        last_counter += 1
+    df_list.append(df.iloc[first_counter:last_counter])
+    return df_list
 
 #------------------------------- Question 1 ---------------------------------------------
 
@@ -79,7 +96,7 @@ def hist_stock(STOCKS_LIST):
 def calculations(STOCKS_LIST):
     df = daily_stock(STOCKS_LIST)
     for i in df:
-        print(i[7:]," statistics:\n") #why 7: ????
+        print(i[7:]," statistics:\n")
         mean = sum(df[i])/len(df[i])
         print(f'Mean: {mean}')
         sd = 0
