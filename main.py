@@ -148,6 +148,8 @@ def Q1(STOCKS_LIST=STOCKS_LIST):
 #------------------------------- Question 2 ---------------------------------------------
 
 def Q2():
+    print('\n\n')
+    print("------------------------------- Question 2 ---------------------------------------------\n\n")
     df = daily_stock(STOCKS_LIST)
     WorkDaysPerYear = 252
     NumOfWin = 200
@@ -160,12 +162,14 @@ def Q2():
     Q2partC(new_df_part_c)
 
 def Q2partA(new_df):
+    print("------------------------------- Part a ---------------------------------------------\n")
     # calculate returns for each stock
     all_stocks_returns = stock_portfolio_for_each_stock(df=new_df)
     # calculate all profits and prints results
     calculate_profits(all_stocks_returns, "Portfolio")
 
 def Q2partB(new_df):
+    print("\n------------------------------- Part b ---------------------------------------------\n")
     # calculate returns for each stock
     all_stocks_returns = structured_deposit_each_stock(new_df=new_df)
 
@@ -173,6 +177,7 @@ def Q2partB(new_df):
     calculate_profits(all_stocks_returns, "Structural deposit")
 
 def Q2partC(new_df):
+    print("\n------------------------------- Part c ---------------------------------------------\n")
     # calculate returns for each stock
     all_stocks_returns = stock_portfolio_for_each_stock(df=new_df)
     # calculate all profits and prints results
@@ -293,10 +298,197 @@ def structured_deposit_each_stock(new_df):
 
     return all_stocks_returns
 
+#------------------------------- Question 4 ---------------------------------------------
+
+def Q4():
+
+    print('\n\n')
+    print("------------------------------- Question 4 ---------------------------------------------\n\n")
+
+    returns, dow_returns, stock_data = data_q4()
+
+    seed = 100
+    stock_num = 7 # num of stocks
+    T = 880 # time
+    N = 880
+    Alpha = 1.7
+    mean_each_stock_list = []
+    sigma_each_stock = []
+
+    for stock in STOCKS_LIST:
+        name = stock[0]
+        mean_each_stock_list.append(returns[name].mean()) #Mean
+        sigma_each_stock.append(returns[name].std()) #std
+    mean_each_stock_df = np.array(mean_each_stock_list)
+    sigma_each_stock_df = np.array(sigma_each_stock)
+
+    stocks_values = []
+    for stock in STOCKS_LIST:
+        stock_values = returns[stock[0]].values
+        stocks_values.append(stock_values)
+
+    Cov = np.cov(stocks_values)  # covariance matrix
+
+    stocks, time = GBM (seed, stock_num, mean_each_stock_df, sigma_each_stock_df, Cov, T, N, Alpha)
+
+    np.random.seed(seed)
+    simul = int(200)
+
+    SS = np.zeros([simul, stock_num, N])
+
+    SS[0, :, :] = stocks
+
+    for k in range(1, simul):
+        seed = int(np.random.uniform(1, 2 ** 32 - 1, 1))
+        SS[k, :, :] = GBM(seed, stock_num,mean_each_stock_df, sigma_each_stock_df, Cov, T, N, Alpha)[0]
+
+    # Plot one of the simulations, e.g. the 0th
+
+    plt.figure(figsize=(16, 8))
+    plt.title('Multidimensional Correlated GBM', fontsize=18)
+    plt.xlabel('Time', fontsize=18)
+    for j in range(stock_num):
+        plt.plot(time, SS[10, j, :])
+
+    sims_200 = []
+    columns = {}
+    i = 0
+    for st in STOCKS_LIST:
+        columns[i] = st[0]
+        i += 1
+    for sim in SS:
+        print(f'this is the SS: {SS}')
+        print(f'this is the sim: {sim}')
+        print(f'this is the sim transpose: {pd.DataFrame(sim).T}')
+        sim_df = pd.DataFrame(sim)
+        sim_df_transposed = sim_df.T
+        sim_df_transposed.rename(columns=columns, inplace=True)
+        for col in sim_df_transposed:
+            sim_df_transposed[col] = sim_df_transposed[col].pct_change()
+        sim_df_transposed = sim_df_transposed.iloc[1:, :]
+        sims_200.append(sim_df_transposed)
+
+    print('\n- - - - - - - - - - - Question 4 section a: - - - - - - - - - - - \n')
+    Q4partA(new_df=sims_200)
+
+    print('\n- - - - - - - - - - - Question 4 section b: - - - - - - - - - - - \n')
+    Q4partB(new_df=sims_200)
+
+def GBM(seed, stockPrice, exReturn, sigma, Cov, T, N, Alpha):
+
+    np.random.seed(seed)
+    dim = 7
+    t = np.linspace(0., T, int(N))
+    A = np.linalg.cholesky(Cov)
+    S = np.zeros([dim, int(N)])
+    S[:, 0] = stockPrice
+    for i in range(1, int(N)):
+        drift = (exReturn - 0.5 * sigma**2) * (t[i] - t[i-1])
+        # Z = np.random.normal(0., 1., dim)
+        Z = np.array([Symmetric_Stable_distributions(Alpha) for _ in range(dim)])
+        diffusion = np.matmul(A, Z) * (np.sqrt(t[i] - t[i-1]))
+        S[:, i] = S[:, i-1]*np.exp(drift + diffusion)
+    return S, t
+
+def data_q4():
+    new_stocks_arr = [('BMY', 0.125), ('CVS', 0.125), ('DAL', 0.125), ('DOW', 0.125), ('FB', 0.125),
+                             ('UG', 0.125), ('SWKS', 0.125), ('MUV', 0.125)]
+    returns = pd.DataFrame({})
+    dow_returns = pd.DataFrame({})
+    stock_data = []
+    for t in new_stocks_arr:
+        name = t[0]
+        ticker = yfinance.Ticker(name)
+        data = ticker.history(interval='1d',
+                              start="2013-01-01", end="2021-12-25")
+        data['date'] = [date for date in data.index]
+        data[name] = data['Close'].pct_change()
+        if name == 'DOW':
+            dow_returns = dow_returns.join(data[[name]],
+                                           how="outer").dropna()
+        else:
+            f_val = data['Close'].iloc[[0]].values.tolist()[0]
+            stock_data.append(f_val)
+            returns = returns.join(data[[name]],
+                                   how="outer").dropna()
+    return returns, dow_returns, stock_data
+
+def Symmetric_Stable_distributions(Alpha):
+    half_pi = np.pi/2
+    U = np.random.uniform(half_pi*-1, half_pi)
+    E = np.random.standard_exponential()
+    return (math.sin(Alpha*U)) * (math.cos(U) ** (-1/Alpha)) * ((math.cos(U*(1-Alpha)) / E) ** ((1/Alpha)-1))
+
+def stock_portfolio_for_each_stock4(df):
+    '''
+
+    :param df: a list of Data Frames for each simulation
+    :return: list of portfolio each stock
+    '''
+    stocks_returns_list = []
+    for current_df in df:
+        for current_stock in STOCKS_LIST:
+            current_stock_name = current_stock[0]
+            total_return_increment_by_one = list(map(lambda x: x + 1, current_df[current_stock_name]))
+            total_return = functools.reduce(lambda x, y: x * y, total_return_increment_by_one)
+            stocks_returns_list.append(total_return)
+
+    return stocks_returns_list
+
+def structured_deposit_each_stock4(new_df):
+    all_stocks_returns = []
+    for current_data_frame in new_df:
+        stocks_dict = {'BMY': current_data_frame['BMY'].tolist(),
+                               'CVS': current_data_frame['CVS'].tolist(),
+                               'DAL': current_data_frame['DAL'].tolist(),
+                               'FB': current_data_frame['FB'].tolist(),
+                               'UG': current_data_frame['UG'].tolist(),
+                               'SWKS': current_data_frame['SWKS'].tolist(),
+                               'MUV': current_data_frame['MUV'].tolist()
+                               }
+
+        for current_stock_list in stocks_dict.values():
+            current_stock_list = list(map(lambda x: x + 1, current_stock_list))
+
+            accumulator = 1
+            is_arrived_36 = False
+            for index, current_return in enumerate(current_stock_list, 0):
+                if index == len(current_stock_list) - 1:
+                    break
+                accumulator *= current_return
+
+                if accumulator >= 1.32:
+                    all_stocks_returns.append(1.02)
+                    is_arrived_36 = True
+                    break
+
+            if not is_arrived_36:
+                if accumulator < 1:
+                    all_stocks_returns.append(1)
+                else:
+                    all_stocks_returns.append(accumulator)
+
+    return all_stocks_returns
+
+def Q4partA(new_df):
+    print("------------------------------- Part a ---------------------------------------------\n")
+    # calculate returns for each stock
+    all_stocks_returns = stock_portfolio_for_each_stock4(df=new_df)
+    # calculate all profits and prints results
+    calculate_profits(all_stocks_returns, "Portfolio")
+
+def Q4partB(new_df):
+    print("\n------------------------------- Part b ---------------------------------------------\n")
+    # calculate returns for each stock
+    all_stocks_returns = structured_deposit_each_stock4(new_df=new_df)
+
+    # calculate all profits and prints results
+    calculate_profits(all_stocks_returns, "Structural deposit")
 
 #------------------------------- Main ---------------------------------------------
-Q2()
-
+# Q1()
+# Q2()
+Q4()
 
 
 
