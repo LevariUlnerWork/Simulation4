@@ -93,8 +93,8 @@ def hist_stock(STOCKS_LIST):
         plt.ylabel("Amount of Days")
         plt.show()
 
-def calculations(STOCKS_LIST):
-    df = daily_stock(STOCKS_LIST)
+def calculations(STOCKS_LIST, df_in):
+    df = df_in
     for i in df:
         print(i[7:]," statistics:\n")
         mean = sum(df[i])/len(df[i])
@@ -140,7 +140,18 @@ def calculations(STOCKS_LIST):
 def Q1(STOCKS_LIST=STOCKS_LIST):
     print("------------------------------- Question 1 ---------------------------------------------")
     hist_stock(STOCKS_LIST)
-    calculations(STOCKS_LIST)
+    df = daily_stock(STOCKS_LIST)
+    calculations(STOCKS_LIST,df)
+
+    #Yearly:
+    print('\n Yearly Data')
+    df = daily_stock(STOCKS_LIST)
+    df_year_list = df_split_by_year(df)
+    year_list = range(2013,2022)
+    for i in range (9):
+        print('\n year ' + str(year_list[i]) + '\n' )
+        calculations(STOCKS_LIST, df_year_list[i])
+
 
 
 
@@ -486,8 +497,8 @@ def Q4partB(new_df):
     calculate_profits(all_stocks_returns, "Structural deposit")
 
 #------------------------------- Main ---------------------------------------------
-# Q1()
-# Q2()
+Q1()
+Q2()
 Q4()
 
 
