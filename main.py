@@ -232,11 +232,11 @@ def calculate_profits(all_stocks_returns, purpose):
     for i in range(len(bmy_returns)):
         mean_return_all_stocks.append(1 / 7 * (bmy_returns[i] + cvs_returns[i] + dal_returns[i] + fb_returns[i] + ug_returns[i] + swks_returns[i] + muv_returns[i]))
 
-        # count number of runs in the return ranges and print each range probability
-        stock_returns_ranges(mean_all_stocks=mean_return_all_stocks, purpose=purpose)
+    # count number of runs in the return ranges and print each range probability
+    stock_returns_ranges(mean_all_stocks=mean_return_all_stocks, purpose=purpose)
 
-        # calculate mean for all stocks of the selected random runs and confidence interval
-        mean_and_confidence_interval(mean_all_stocks=mean_return_all_stocks, purpose=purpose)
+    # calculate mean for all stocks of the selected random runs and confidence interval
+    mean_and_confidence_interval(mean_all_stocks=mean_return_all_stocks, purpose=purpose)
 
 def stock_returns_ranges(mean_all_stocks: list, purpose: str):
     print(f'Sections a-d for the {purpose}:')
@@ -353,13 +353,16 @@ def Q4():
         seed = int(np.random.uniform(1, 2 ** 32 - 1, 1))
         SS[k, :, :] = GBM(seed, stock_num,mean_each_stock_df, sigma_each_stock_df, Cov, T, N, Alpha)[0]
 
-    # Plot one of the simulations, e.g. the 0th
-
+    # Question 3:
+    '''
     plt.figure(figsize=(16, 8))
     plt.title('Multidimensional Correlated GBM', fontsize=18)
     plt.xlabel('Time', fontsize=18)
     for j in range(stock_num):
-        plt.plot(time, SS[10, j, :])
+        plt.plot(time, SS[10, j, :],label=STOCKS_LIST[j][0])
+    plt.legend()
+    plt.show()
+    '''
 
     sims_200 = []
     columns = {}
@@ -368,9 +371,9 @@ def Q4():
         columns[i] = st[0]
         i += 1
     for sim in SS:
-        print(f'this is the SS: {SS}')
-        print(f'this is the sim: {sim}')
-        print(f'this is the sim transpose: {pd.DataFrame(sim).T}')
+        # print(f'this is the SS: {SS}')
+        # print(f'this is the sim: {sim}')
+        # print(f'this is the sim transpose: {pd.DataFrame(sim).T}')
         sim_df = pd.DataFrame(sim)
         sim_df_transposed = sim_df.T
         sim_df_transposed.rename(columns=columns, inplace=True)
@@ -497,8 +500,8 @@ def Q4partB(new_df):
     calculate_profits(all_stocks_returns, "Structural deposit")
 
 #------------------------------- Main ---------------------------------------------
-Q1()
-Q2()
+# Q1()
+# Q2()
 Q4()
 
 
