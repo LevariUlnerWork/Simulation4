@@ -104,7 +104,6 @@ def calculations(STOCKS_LIST, df_in):
             sd += pow(val - mean,2)
         sd_value = math.sqrt(sd/(len(df[i])-1))
         print(f'Standard Deviation: {sd_value}')
-
         # correlation
         corr = pd.Series(df[i]).autocorr()
         print(f'Corr: {corr}','\n')
@@ -130,12 +129,6 @@ def calculations(STOCKS_LIST, df_in):
     plt.title('Covariance Matrix\n', fontweight='bold', fontsize=14)
     plt.show()
 
-# def groupby(STOCKS_LIST):
-#     df = daily_stock(STOCKS_LIST)
-    # print(df)
-    # print(df['Date'].dt.year)
-
-# groupby(STOCKS_LIST)
 
 def Q1(STOCKS_LIST=STOCKS_LIST):
     print("------------------------------- Question 1 ---------------------------------------------")
@@ -148,12 +141,15 @@ def Q1(STOCKS_LIST=STOCKS_LIST):
     df = daily_stock(STOCKS_LIST)
     df_year_list = df_split_by_year(df)
     year_list = range(2013,2022)
+
+
     for i in range (9):
+        means = []
+        sds = []
         print('\n year ' + str(year_list[i]) + '\n' )
         calculations(STOCKS_LIST, df_year_list[i])
-
-
-
+        print(f'mean of means: {sum(means) / len(means)}')
+        print(f'sd of sds: {sum(sds) / len(sds)}')
 
 
 #------------------------------- Question 2 ---------------------------------------------
@@ -167,8 +163,8 @@ def Q2():
     NumOfDaysPerWin = int(WorkDaysPerYear * 3.5 / NumOfWin) + 1
     df_into_bins = np.array_split(df,df.shape[0]/int(NumOfDaysPerWin))
     new_df = sim_rand_win(df_into_bins, 100, 200)
-    # Q2partA(new_df)
-    # Q2partB(new_df)
+    Q2partA(new_df)
+    Q2partB(new_df)
     new_df_part_c = sim_rand_win(df_into_bins, 100, 200)
     Q2partC(new_df_part_c)
 
@@ -510,10 +506,10 @@ def Q4partB(new_df):
     calculate_profits(all_stocks_returns, "Structural deposit")
 
 #------------------------------- Main ---------------------------------------------
-# Q1()
-# Q2()
-Q4(False)
-Q4(True)
+# Q1(STOCKS_LIST=STOCKS_LIST)
+Q2()
+# Q4(False)
+# Q4(True)
 
 
 
