@@ -311,11 +311,13 @@ def structured_deposit_each_stock(new_df):
 
 #------------------------------- Question 4 ---------------------------------------------
 
-def Q4():
+def Q4(isFive):
 
     print('\n\n')
-    print("------------------------------- Question 4 ---------------------------------------------\n\n")
-
+    if (isFive == False):
+        print("------------------------------- Question 4 ---------------------------------------------\n\n")
+    else:
+        print("------------------------------- Question 5 ---------------------------------------------\n\n")
     returns, dow_returns, stock_data = data_q4()
 
     seed = 100
@@ -340,7 +342,7 @@ def Q4():
 
     Cov = np.cov(stocks_values)  # covariance matrix
 
-    stocks, time = GBM (seed, stock_num, mean_each_stock_df, sigma_each_stock_df, Cov, T, N, Alpha)
+    stocks, time = GBM (seed, stock_num, mean_each_stock_df, sigma_each_stock_df, Cov, T, N, Alpha, isFive)
 
     np.random.seed(seed)
     simul = int(200)
@@ -351,7 +353,7 @@ def Q4():
 
     for k in range(1, simul):
         seed = int(np.random.uniform(1, 2 ** 32 - 1, 1))
-        SS[k, :, :] = GBM(seed, stock_num,mean_each_stock_df, sigma_each_stock_df, Cov, T, N, Alpha)[0]
+        SS[k, :, :] = GBM(seed, stock_num,mean_each_stock_df, sigma_each_stock_df, Cov, T, N, Alpha, isFive)[0]
 
     # Question 3:
     '''
@@ -382,13 +384,19 @@ def Q4():
         sim_df_transposed = sim_df_transposed.iloc[1:, :]
         sims_200.append(sim_df_transposed)
 
-    print('\n- - - - - - - - - - - Question 4 section a: - - - - - - - - - - - \n')
+    if(isFive == False):
+        print('\n- - - - - - - - - - - Question 4 section a: - - - - - - - - - - - \n')
+    else:
+        print('\n- - - - - - - - - - - Question 5 section a: - - - - - - - - - - - \n')
     Q4partA(new_df=sims_200)
 
-    print('\n- - - - - - - - - - - Question 4 section b: - - - - - - - - - - - \n')
+    if (isFive == False):
+        print('\n- - - - - - - - - - - Question 4 section b: - - - - - - - - - - - \n')
+    else:
+        print('\n- - - - - - - - - - - Question 5 section b: - - - - - - - - - - - \n')
     Q4partB(new_df=sims_200)
 
-def GBM(seed, stockPrice, exReturn, sigma, Cov, T, N, Alpha):
+def GBM(seed, stockPrice, exReturn, sigma, Cov, T, N, Alpha, isFive):
 
     np.random.seed(seed)
     dim = 7
@@ -398,8 +406,10 @@ def GBM(seed, stockPrice, exReturn, sigma, Cov, T, N, Alpha):
     S[:, 0] = stockPrice
     for i in range(1, int(N)):
         drift = (exReturn - 0.5 * sigma**2) * (t[i] - t[i-1])
-        # Z = np.random.normal(0., 1., dim)
-        Z = np.array([Symmetric_Stable_distributions(Alpha) for _ in range(dim)])
+        if(isFive == False):
+            Z = np.random.normal(0., 1., dim)
+        else:
+            Z = np.array([Symmetric_Stable_distributions(Alpha) for _ in range(dim)])
         diffusion = np.matmul(A, Z) * (np.sqrt(t[i] - t[i-1]))
         S[:, i] = S[:, i-1]*np.exp(drift + diffusion)
     return S, t
@@ -502,7 +512,8 @@ def Q4partB(new_df):
 #------------------------------- Main ---------------------------------------------
 # Q1()
 # Q2()
-Q4()
+Q4(False)
+Q4(True)
 
 
 
